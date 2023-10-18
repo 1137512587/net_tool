@@ -3,7 +3,7 @@
 #include "net_intf.h"
 #include "net_property.h"
 
-#define OPTION_STRING "I"
+#define OPTION_STRING "I:"
 
 struct net_cmd {
 	int (*func)(int argc, char *argv[]);
@@ -16,23 +16,28 @@ struct net_cmd net_cmd_list[] = {
 	{ NULL },
 };
 
-int net_cmd_run(struct net_cmd * net_cmd_list, char * name,int argc, char * argv[]) {
+int net_cmd_run(struct net_cmd * net_cmd_list, char * name,int argc, char * argv[]) 
+{
 	struct net_cmd * cmdlist = net_cmd_list;
-
 	if (!name) {
-		if(!cmdlist->func || !cmdlist->name)
+		if(!cmdlist->func || !cmdlist->name) {
+			printf("have'n func and name\n");
 			return -1;
-		return -1;
+		}
+		printf("cmd name is null\n");
 	}
 	
 	for(cmdlist = net_cmd_list; cmdlist->func; cmdlist++){
-		if (!strcmp(name, cmdlist->name))
+		if (!strcmp(name, cmdlist->name)) {
 			break;
+		}
 	}
 
 	if (!cmdlist->func) {
+		printf("cmdlist have'n func\n");
 		return -1;
 	}
+	
 	return cmdlist->func(argc,argv);
 }
 
@@ -52,7 +57,9 @@ int net_tool_main(int argc, char *argv[]) {
 	}
 	
 	if (argc-optind > 0)
+	{
 		ret = net_cmd_run(net_cmd_list, argv[optind], argc-optind-1, &(argv[optind+1]));
+	}
 
 	return ret;
 }
