@@ -2,7 +2,8 @@
 #include <unistd.h>
 #include "net_intf.h"
 #include "net_property.h"
-
+#include "net_clinet.h"
+#include "net_service.h"
 #define OPTION_STRING "I:"
 
 struct net_cmd {
@@ -12,7 +13,9 @@ struct net_cmd {
 };
 
 struct net_cmd net_cmd_list[] = {
-	{ net_property_main, "property", "get net device info." },
+	{ net_property_main,	"property",	"get net device info." },
+	{ net_clinet_main,	"clinet",	"socket clinet." },	 
+	{ net_service_main,	"service",	"socket service." },	 
 	{ NULL },
 };
 
