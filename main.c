@@ -14,7 +14,7 @@ struct net_cmd {
 
 struct net_cmd net_cmd_list[] = {
 	{ net_property_main,	"property",	"get net device info." },
-	{ net_clinet_main,	"clinet",	"socket clinet." },	 
+	{ net_client_main,	"client",	"socket client." },	 
 	{ net_service_main,	"service",	"socket service." },	 
 	{ NULL },
 };
