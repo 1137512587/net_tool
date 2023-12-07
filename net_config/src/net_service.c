@@ -3,21 +3,27 @@
 #include <arpa/inet.h>
 #include "net_intf.h"
 #include "net_service.h"
+#include <signal.h>
 
 
 void do_service(int conn)
 {
         int data_len;
         struct packet recvbuf;
+	struct sockaddr_in client_addr;
+	socklen_t client_len = sizeof(client_addr);
+	getpeername(conn, (struct sockaddr*)&client_addr, &client_len);
+	printf("ip:%s port:%d connect\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
         while(1)
         {
 		memset(&recvbuf, 0, sizeof(recvbuf));
-                int ret = readn(conn, recvbuf.len, 4);
+                int ret = readn(conn, &recvbuf.len, 4);
 		if (ret == -1)
 			ERR_EXIT("read");
 		if (ret < 4)
 		{
-			printf("client close\n");
+			printf("ip:%s port:%d disconnect\n",
+					inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 			break;
 		}
 
@@ -27,7 +33,8 @@ void do_service(int conn)
                         ERR_EXIT("read");
                 if (ret < data_len)
                 {
-                        printf("client close\n");
+                        printf("ip:%s port:%d disconnect\n",
+					inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
                         break;
                 }
                 fputs(recvbuf.buf,stdout);
@@ -36,9 +43,14 @@ void do_service(int conn)
         }
 }
 
+void head_fun(int sig)
+{
+	printf("sig test\n");
+}
 
 int sock_service()
 {
+	signal(SIGCHLD,head_fun);
         int sock_fd;
         if ((sock_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
                 ERR_EXIT("clinet socket");
@@ -61,12 +73,27 @@ int sock_service()
         int conn_fd;
         struct sockaddr_in sockaddr_client;
         socklen_t client_len = sizeof(sockaddr_client);
-        if((conn_fd = accept(sock_fd, (struct sockaddr*)&sockaddr_client, &client_len)) < 0) {
-                ERR_EXIT("clinet accept");
-        }
-        printf("ip:%d port:%s connect\n", ntohs(sockaddr_client.sin_port), inet_ntoa(sockaddr_client.sin_addr));
+	memset(&sockaddr_client, 0, sizeof(sockaddr_client));
+	while(1) 
+	{
+        	if((conn_fd = accept(sock_fd, (struct sockaddr*)&sockaddr_client, &client_len)) < 0) {
+               		ERR_EXIT("clinet accept");
+        	}
 	
-	do_service(conn_fd);
+		pid_t client_pid;
+       		client_pid = fork();
+		if (client_pid < 0)
+		{
+			ERR_EXIT("fork");
+		}else if (client_pid == 0) { //子进程
+		
+			do_service(conn_fd);
+			close(conn_fd);
+		}
+
+	}
+
+	close(sock_fd);
         
 	return 0;
 

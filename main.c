@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include "net_intf.h"
 #include "net_property.h"
-#include "net_clinet.h"
+#include "net_client.h"
 #include "net_service.h"
 #define OPTION_STRING "I:"
 
