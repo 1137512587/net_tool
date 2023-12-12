@@ -20,7 +20,7 @@ int do_client(int conn)
 
                 writen(conn, &sendbuf, 4+data_len);
 
-                ret = readn(conn,recvbuf.len, 4);
+                ret = readn(conn, &recvbuf.len, 4);
 		if (ret == -1)
                         ERR_EXIT("read");
                 if (ret < 4)
@@ -80,7 +80,7 @@ int sock_client()
 
                 writen(sock_fd, &sendbuf, 4+data_len);
 
-                ret = readn(sock_fd,recvbuf.len, 4);
+                ret = readn(sock_fd, &recvbuf.len, 4);
                 if (ret == -1)
                         ERR_EXIT("read1");
                 if (ret < 4)
